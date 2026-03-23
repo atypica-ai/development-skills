@@ -1,0 +1,81 @@
+{
+  "skill_name": "prisma-migrate-squash",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I have 19 Prisma migrations that have built up over 6 months of development. I want to squash them all into a single clean init migration. Walk me through the full process.",
+      "expected_output": "Step-by-step guide covering: delete old migration folders (keeping migration_lock.toml), create a timestamped init directory, run prisma migrate diff --from-empty to generate the squashed SQL, note manual fixes needed for special indexes, clear _prisma_migrations table in dev, run prisma migrate resolve --applied on all environments, and verify with migrate status.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "has-delete-command",
+          "text": "Output includes a command to delete existing migration folders (e.g., find ... -exec rm -rf or rm -rf)"
+        },
+        {
+          "id": "preserves-migration-lock",
+          "text": "Explicitly mentions keeping or preserving migration_lock.toml"
+        },
+        {
+          "id": "uses-migrate-diff",
+          "text": "Shows the npx prisma migrate diff --from-empty --to-schema-datamodel command"
+        },
+        {
+          "id": "has-resolve-applied",
+          "text": "Shows npx prisma migrate resolve --applied command"
+        },
+        {
+          "id": "dev-vs-prod-distinction",
+          "text": "Distinguishes between dev environment (needs _prisma_migrations cleanup) and production (does not need this step)"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "We're using pgvector with halfvec(1024) embeddings in our Prisma schema and need to squash our migrations before a production release next week. What do we need to watch out for with the vector indexes?",
+      "expected_output": "Should cover the full squash workflow AND specifically call out that Prisma generates incorrect plain B-tree indexes for vector columns, show the wrong generated SQL vs the correct HNSW syntax with halfvec_cosine_ops and parameters (m, ef_construction), and advise checking original migrations for the exact index parameters.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "all-generic-steps-present",
+          "text": "Includes the core squash steps (delete migrations, migrate diff, resolve --applied)"
+        },
+        {
+          "id": "warns-about-hnsw",
+          "text": "Explicitly warns that Prisma generates wrong index type for vector columns after migrate diff"
+        },
+        {
+          "id": "shows-hnsw-syntax",
+          "text": "Shows correct USING hnsw syntax for vector index creation"
+        },
+        {
+          "id": "mentions-halfvec-cosine-ops",
+          "text": "Uses the correct halfvec_cosine_ops operator class (not generic vector_cosine_ops)"
+        },
+        {
+          "id": "advises-check-original",
+          "text": "Suggests checking original migrations to find and match the correct index parameters (m, ef_construction)"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "our migration folder is a total mess after 6 months of dev — we've got like 25 migration folders and it's slowing down our team. can we just start fresh somehow?",
+      "expected_output": "Should recognize this as a squash request (no jargon), explain what migration squashing is briefly, then provide the full process. Should not require the user to already know the term 'squash'.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "explains-what-squash-is",
+          "text": "Explains what migration squashing/collapsing means in plain language before diving into commands"
+        },
+        {
+          "id": "still-gives-commands",
+          "text": "Despite the casual phrasing, still provides the actual CLI commands needed"
+        },
+        {
+          "id": "uses-migrate-diff",
+          "text": "Includes the prisma migrate diff --from-empty command"
+        }
+      ]
+    }
+  ]
+}
